@@ -1,0 +1,22 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="stylesheet.css">
+		<title>Unwinnable game</title>
+	</head>
+	<body>
+		<h1 class="header">You can totally win this game</h1>
+		<h2 class="header">By default the human player will start.</h2>
+		<button type="button" onclick="changeStartingPlayer()">Press this button to allow the computer to start first</button>
+		<br>
+		<div id="canvasContainer">
+			<canvas id="board" width="600" height="600"></canvas>
+		</div>
+		<h2 class="header" id="victoryText"></h2>
+		<button type="button" onclick="location.reload()">Click to reload game.</button>
+		<br>
+		<div>
+			Click <a href="index.html">here</a> to play Tic Tac Toe.
+		</div>
+		<script src="checkers.js" id="reloadButton"></script>
+	</body>
+</html>

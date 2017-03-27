@@ -1,0 +1,22 @@
+.header {
+	text-align: center;
+}
+
+div {
+   width: 100%;
+   text-align:center;
+}
+
+#board {	
+   border:1px solid #000000;
+}
+
+
+
+button {
+    display: block; margin: 0 auto;
+}
+
+canvas {
+   display: inline;
+}
