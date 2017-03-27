@@ -127,7 +127,7 @@ function onBoardClick()
 		highlightSquare(context, BOARD_SIZE, row, column);
 		selectedPiece = [row, column];
 	}
- 	else
+ 	else if (selectedPiece[0] != -1)
 	{
 		move(selectedPiece, [row, column]);
 		selectedPiece = [-1, -1];
@@ -136,48 +136,6 @@ function onBoardClick()
 
 function move(piece, destination)
 {
-	/*
-	//Black, non-king pieces
-	if ((piece[0] == destination[0] - 1) && 
-		(piece[1] == destination[1] - 1 || piece[1] == destination[1] + 1) &&
-		(board[destination[0]][destination[1]] == "") &&
-		(board[piece[0]][piece[1]][0] == 'b'))
-	{
-		board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
-		board[piece[0]][piece[1]] = "";
-
-		//Change turn player
-		if (turnPlayer[0] == 'r')
-		{
-			turnPlayer = 'b';
-		}
-		else
-		{
-			turnPlayer = 'r';
-		}
-	}
-
-	//Red, non-king pieces
-	if ((piece[0] == destination[0] + 1) && 
-		(piece[1] == destination[1] - 1 || piece[1] == destination[1] + 1) &&
-		(board[destination[0]][destination[1]] == "") &&
-		(board[piece[0]][piece[1]][0] == 'r'))
-	{
-		board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
-		board[piece[0]][piece[1]] = "";
-
-		//Change turn player
-		if (turnPlayer[0] == 'r')
-		{
-			turnPlayer = 'b';
-		}
-		else
-		{
-			turnPlayer = 'r';
-		}
-	}
-	*/
-
 	var successfulMove = false;
 
 	//If red piece
@@ -195,7 +153,30 @@ function move(piece, destination)
 		}
 
 		//Jump case
-		
+		if (destination[0] == piece[0] - 2 && (destination[1] == piece[1] - 2 || destination[1] == piece[1] + 2))
+		{
+			//Make sure a piece is actually being jumped
+			if (destination[1] - piece[1] < 0)
+			{
+				if (board[piece[0] - 1][piece[1] - 1][0] == 'b')
+				{
+					board[piece[0] - 1][piece[1] - 1] = "";
+					board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
+					board[piece[0]][piece[1]] = "";
+					successfulMove = true;
+				}
+			}
+			else
+			{
+				if (board[piece[0] - 1][piece[1] + 1][0] == 'b')
+				{
+					board[piece[0] - 1][piece[1] + 1] = "";
+					board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
+					board[piece[0]][piece[1]] = "";
+					successfulMove = true;
+				}
+			}
+		}
 	}
 
 	//If black piece
