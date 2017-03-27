@@ -121,47 +121,109 @@ function onBoardClick()
 	var column = coord[1];
 	console.log(coord);
 		
-	if (selectedPiece[0] == -1 && selectedPiece[1] == -1 && turnPlayer[0] == board[row][column][0])
+	if (board[row][column] != "" && selectedPiece[0] == -1 && selectedPiece[1] == -1 && turnPlayer[0] == board[row][column][0])
 	{
 		//Store selected piece and highlight square
 		highlightSquare(context, BOARD_SIZE, row, column);
-		selectedPiece = [coord[0], coord[1]]
+		selectedPiece = [row, column];
 	}
-	else
+ 	else
 	{
 		move(selectedPiece, [row, column]);
 		selectedPiece = [-1, -1];
-	}
-
-	//Change turn player
-	if (turnPlayer[0] == 'r')
-	{
-		turnPlayer = 'b';
-	}
-	else
-	{
-		turnPlayer = 'r';
-	}
+	}	
 }
 
 function move(piece, destination)
 {
+	/*
 	//Black, non-king pieces
 	if ((piece[0] == destination[0] - 1) && 
 		(piece[1] == destination[1] - 1 || piece[1] == destination[1] + 1) &&
-		(board[destination[0]][destination[1]] == ""))
+		(board[destination[0]][destination[1]] == "") &&
+		(board[piece[0]][piece[1]][0] == 'b'))
 	{
 		board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
 		board[piece[0]][piece[1]] = "";
+
+		//Change turn player
+		if (turnPlayer[0] == 'r')
+		{
+			turnPlayer = 'b';
+		}
+		else
+		{
+			turnPlayer = 'r';
+		}
 	}
 
 	//Red, non-king pieces
 	if ((piece[0] == destination[0] + 1) && 
 		(piece[1] == destination[1] - 1 || piece[1] == destination[1] + 1) &&
-		(board[destination[0]][destination[1]] == ""))
+		(board[destination[0]][destination[1]] == "") &&
+		(board[piece[0]][piece[1]][0] == 'r'))
 	{
 		board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
 		board[piece[0]][piece[1]] = "";
+
+		//Change turn player
+		if (turnPlayer[0] == 'r')
+		{
+			turnPlayer = 'b';
+		}
+		else
+		{
+			turnPlayer = 'r';
+		}
+	}
+	*/
+
+	var successfulMove = false;
+
+	//If red piece
+	if (board[piece[0]][piece[1]] == 'r')
+	{
+		//Normal move forward case
+		if (destination[0] == piece[0] - 1 && (destination[1] == piece[1] - 1 || destination[1] == piece[1] + 1))
+		{
+			if (board[destination[0]][destination[1]] == "")
+			{
+				board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
+				board[piece[0]][piece[1]] = "";
+				successfulMove = true;
+			}
+		}
+
+		//Jump case
+		
+	}
+
+	//If black piece
+	if (board[piece[0]][piece[1]] == 'b')
+	{
+		//Normal move forward case
+		if (destination[0] == piece[0] + 1 && (destination[1] == piece[1] - 1 || destination[1] == piece[1] + 1))
+		{
+			if (board[destination[0]][destination[1]] == "")
+			{
+				board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
+				board[piece[0]][piece[1]] = "";
+				successfulMove = true;
+			}
+		}		
+	}
+
+	if (successfulMove)
+	{
+		//Change turn player
+		if (turnPlayer[0] == 'r')
+		{
+			turnPlayer = 'b';
+		}
+		else
+		{
+			turnPlayer = 'r';
+		}
 	}
 
 	//Redraw board
