@@ -121,7 +121,7 @@ function onBoardClick()
 	var column = coord[1];
 	console.log(coord);
 		
-	if (board[row][column] != "" && selectedPiece[0] == -1 && selectedPiece[1] == -1 && turnPlayer[0] == board[row][column][0])
+	if (board[row][column] != 'e' && selectedPiece[0] == -1 && selectedPiece[1] == -1 && turnPlayer[0] == board[row][column][0])
 	{
 		//Store selected piece and highlight square
 		highlightSquare(context, BOARD_SIZE, row, column);
@@ -131,12 +131,24 @@ function onBoardClick()
 	{
 		move(selectedPiece, [row, column]);
 		selectedPiece = [-1, -1];
-	}	
+	}
+
+
+	if (canJump(board, turnPlayer))
+	{
+		document.getElementById("victoryText").innerHTML = "Mandatory jump for " + turnPlayer;
+	}
+	else
+	{
+		document.getElementById("victoryText").innerHTML = "";
+	}
 }
 
 function move(piece, destination)
 {
 	var successfulMove = false;
+	var lastMoveWasJump = false;
+	var jump = false;
 
 	//If red piece
 	if (board[piece[0]][piece[1]] == 'r')
@@ -144,10 +156,10 @@ function move(piece, destination)
 		//Normal move forward case
 		if (destination[0] == piece[0] - 1 && (destination[1] == piece[1] - 1 || destination[1] == piece[1] + 1))
 		{
-			if (board[destination[0]][destination[1]] == "")
+			if (board[destination[0]][destination[1]] == 'e')
 			{
 				board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
-				board[piece[0]][piece[1]] = "";
+				board[piece[0]][piece[1]] = 'e';
 				successfulMove = true;
 			}
 		}
@@ -160,20 +172,22 @@ function move(piece, destination)
 			{
 				if (board[piece[0] - 1][piece[1] - 1][0] == 'b')
 				{
-					board[piece[0] - 1][piece[1] - 1] = "";
+					board[piece[0] - 1][piece[1] - 1] = 'e';
 					board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
-					board[piece[0]][piece[1]] = "";
+					board[piece[0]][piece[1]] = 'e';
 					successfulMove = true;
+					lastMoveWasJump = true;
 				}
 			}
 			else
 			{
 				if (board[piece[0] - 1][piece[1] + 1][0] == 'b')
 				{
-					board[piece[0] - 1][piece[1] + 1] = "";
+					board[piece[0] - 1][piece[1] + 1] = 'e';
 					board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
-					board[piece[0]][piece[1]] = "";
+					board[piece[0]][piece[1]] = 'e';
 					successfulMove = true;
+					lastMoveWasJump = true;
 				}
 			}
 		}
@@ -185,16 +199,49 @@ function move(piece, destination)
 		//Normal move forward case
 		if (destination[0] == piece[0] + 1 && (destination[1] == piece[1] - 1 || destination[1] == piece[1] + 1))
 		{
-			if (board[destination[0]][destination[1]] == "")
+			if (board[destination[0]][destination[1]] == 'e')
 			{
 				board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
-				board[piece[0]][piece[1]] = "";
+				board[piece[0]][piece[1]] = 'e';
 				successfulMove = true;
 			}
-		}		
+		}
+
+		//Jump case
+		if (destination[0] == piece[0] + 2 && (destination[1] == piece[1] - 2 || destination[1] == piece[1] + 2))
+		{
+			//Make sure a piece is actually being jumped
+			if (destination[1] - piece[1] < 0)
+			{
+				if (board[piece[0] + 1][piece[1] - 1][0] == 'r')
+				{
+					board[piece[0] + 1][piece[1] - 1] = 'e';
+					board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
+					board[piece[0]][piece[1]] = 'e';
+					successfulMove = true;
+					lastMoveWasJump = true;
+				}
+			}
+			else
+			{
+				if (board[piece[0] + 1][piece[1] + 1][0] == 'r')
+				{
+					board[piece[0] + 1][piece[1] + 1] = 'e';
+					board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
+					board[piece[0]][piece[1]] = 'e';
+					successfulMove = true;
+					lastMoveWasJump = true;
+				}
+			}
+		}
 	}
 
-	if (successfulMove)
+	if (lastMoveWasJump)
+	{
+		jump = canJump(board, turnPlayer);
+	}
+
+	if (successfulMove && !jump)
 	{
 		//Change turn player
 		if (turnPlayer[0] == 'r')
@@ -211,6 +258,41 @@ function move(piece, destination)
 	drawBoard(context, BOARD_SIZE, board);
 }
 
+function canJump(board, turnPlayer)
+{
+	for (var i = 0; i < BOARD_SIZE; i++)
+	{
+		for (var j = 0; j < BOARD_SIZE; j++)
+		{
+			if (board[i][j][0] == turnPlayer)
+			{
+				if (board[i][j][0] == 'r')
+				{
+					if ((i - 1 >= 0) && (i - 1 < BOARD_SIZE) && (j - 1 >= 0) && (j - 1 < BOARD_SIZE) && board[i - 1][j - 1] == 'b' || board[i - 1][j + 1] == 'b')
+					{
+						if ((i - 2 >= 0) && (i - 2 < BOARD_SIZE) && (j - 2 >= 0) && (j - 2 < BOARD_SIZE) && board[i - 2][j - 2] == 'e' || board[i - 2][j + 2] == 'e')
+						{
+							return true;
+						}
+					}
+				}
+
+				if (board[i][j][0] == 'b')
+				{
+					if ((i - 1 >= 0) && (i - 1 < BOARD_SIZE) && (j - 1 >= 0) && (j - 1 < BOARD_SIZE) && board[i + 1][j - 1] == 'r' || board[i + 1][j + 1] == 'r')
+					{
+						if ((i - 2 >= 0) && (i - 2 < BOARD_SIZE) && (j - 2 >= 0) && (j - 2 < BOARD_SIZE) && board[i + 2][j - 2] == 'e' || board[i + 2][j + 2] == 'e')
+						{
+							return true;
+						}
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
 var BOARD_SIZE = 8;
 
 var canvas = document.getElementById("board");
@@ -224,9 +306,9 @@ var selectedPiece = [-1, -1];
 var turnPlayer = 'r';
 
 //Init board
-var board = [['b','','b','','b','','b',''],['','b','','b','','b','','b'],
-			 ['b','','b','','b','','b',''],['','','','','','','',''],
-			 ['','','','','','','',''],['','r','','r','','r','','r'],
-			 ['r','','r','','r','','r',''],['','r','','r','','r','','r']];
+var board = [['b','e','b','e','b','e','b','e'],['e','b','e','b','e','b','e','b'],
+			 ['b','e','b','e','b','e','b','e'],['e','e','e','e','e','e','e','e'],
+			 ['e','e','e','e','e','e','e','e'],['e','r','e','r','e','r','e','r'],
+			 ['r','e','r','e','r','e','r','e'],['e','r','e','r','e','r','e','r']];
 
 drawBoard(context, BOARD_SIZE, board);
