@@ -113,184 +113,121 @@ function getBoardCoord()
 	return [x, y];
 }
 
-function onBoardClick()
+function isFacingOpponent(board, turnPlayer, row, column)
 {
-	//Get position of click on board
-	var coord = getBoardCoord();
-	var row = coord[0];
-	var column = coord[1];
-	console.log(coord);
-		
-	if (board[row][column] != 'e' && selectedPiece[0] == -1 && selectedPiece[1] == -1 && turnPlayer[0] == board[row][column][0])
+	if (turnPlayer == 'r')
 	{
-		//Store selected piece and highlight square
-		highlightSquare(context, BOARD_SIZE, row, column);
-		selectedPiece = [row, column];
-	}
- 	else if (selectedPiece[0] != -1)
-	{
-		move(selectedPiece, [row, column]);
-		selectedPiece = [-1, -1];
-	}
-
-
-	if (canJump(board, turnPlayer))
-	{
-		document.getElementById("victoryText").innerHTML = "Mandatory jump for " + turnPlayer;
+		return board[row - 1][column - 1] == 'b' || board[row - 1][column + 1] == 'b';
 	}
 	else
 	{
-		document.getElementById("victoryText").innerHTML = "";
+		return board[row + 1][column - 1] == 'r' || board[row + 1][column + 1] == 'r';
 	}
 }
 
-function move(piece, destination)
+function isInFrontOf(board, x, y, a, b)
 {
-	var successfulMove = false;
-	var lastMoveWasJump = false;
-	var jump = false;
+	var turnPlayer = board[x][y];
 
-	//If red piece
-	if (board[piece[0]][piece[1]] == 'r')
+	if (turnPlayer == 'r')
 	{
-		//Normal move forward case
-		if (destination[0] == piece[0] - 1 && (destination[1] == piece[1] - 1 || destination[1] == piece[1] + 1))
-		{
-			if (board[destination[0]][destination[1]] == 'e')
-			{
-				board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
-				board[piece[0]][piece[1]] = 'e';
-				successfulMove = true;
-			}
-		}
-
-		//Jump case
-		if (destination[0] == piece[0] - 2 && (destination[1] == piece[1] - 2 || destination[1] == piece[1] + 2))
-		{
-			//Make sure a piece is actually being jumped
-			if (destination[1] - piece[1] < 0)
-			{
-				if (board[piece[0] - 1][piece[1] - 1][0] == 'b')
-				{
-					board[piece[0] - 1][piece[1] - 1] = 'e';
-					board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
-					board[piece[0]][piece[1]] = 'e';
-					successfulMove = true;
-					lastMoveWasJump = true;
-				}
-			}
-			else
-			{
-				if (board[piece[0] - 1][piece[1] + 1][0] == 'b')
-				{
-					board[piece[0] - 1][piece[1] + 1] = 'e';
-					board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
-					board[piece[0]][piece[1]] = 'e';
-					successfulMove = true;
-					lastMoveWasJump = true;
-				}
-			}
-		}
+		return a == x - 1 && (b == y - 1 || b == y + 1);
 	}
-
-	//If black piece
-	if (board[piece[0]][piece[1]] == 'b')
+	else
 	{
-		//Normal move forward case
-		if (destination[0] == piece[0] + 1 && (destination[1] == piece[1] - 1 || destination[1] == piece[1] + 1))
-		{
-			if (board[destination[0]][destination[1]] == 'e')
-			{
-				board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
-				board[piece[0]][piece[1]] = 'e';
-				successfulMove = true;
-			}
-		}
-
-		//Jump case
-		if (destination[0] == piece[0] + 2 && (destination[1] == piece[1] - 2 || destination[1] == piece[1] + 2))
-		{
-			//Make sure a piece is actually being jumped
-			if (destination[1] - piece[1] < 0)
-			{
-				if (board[piece[0] + 1][piece[1] - 1][0] == 'r')
-				{
-					board[piece[0] + 1][piece[1] - 1] = 'e';
-					board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
-					board[piece[0]][piece[1]] = 'e';
-					successfulMove = true;
-					lastMoveWasJump = true;
-				}
-			}
-			else
-			{
-				if (board[piece[0] + 1][piece[1] + 1][0] == 'r')
-				{
-					board[piece[0] + 1][piece[1] + 1] = 'e';
-					board[destination[0]][destination[1]] = board[piece[0]][piece[1]];
-					board[piece[0]][piece[1]] = 'e';
-					successfulMove = true;
-					lastMoveWasJump = true;
-				}
-			}
-		}
+		return a == x + 1 && (b == y - 1 || b == y + 1);
 	}
-
-	if (lastMoveWasJump)
-	{
-		jump = canJump(board, turnPlayer);
-	}
-
-	if (successfulMove && !jump)
-	{
-		//Change turn player
-		if (turnPlayer[0] == 'r')
-		{
-			turnPlayer = 'b';
-		}
-		else
-		{
-			turnPlayer = 'r';
-		}
-	}
-
-	//Redraw board
-	drawBoard(context, BOARD_SIZE, board);
 }
 
-function canJump(board, turnPlayer)
+function isEmpty(board, x, y)
+{
+	return board[x][y] == 'e';
+}
+
+function canJump(board, x, y)
+{
+	var turnPlayer = board[x][y];
+	if (turnPlayer == 'r')
+	{
+		if (board[x - 1][y - 1] == 'b' || board[x - 1][y + 1] == 'b')
+		{
+			return board[x - 2][y - 2] == 'e' || board[x - 2][y + 2] == 'e';
+		}
+	}
+	else
+	{
+		if (board[x + 1][y - 1] == 'r' || board[x + 1][y + 1] == 'r')
+		{
+			return board[x + 2][y - 2] == 'e' || board[x + 2][y + 2] == 'e';
+		}
+	}
+}
+
+function turnPlayerCanJump(board, turnPlayer)
 {
 	for (var i = 0; i < BOARD_SIZE; i++)
 	{
 		for (var j = 0; j < BOARD_SIZE; j++)
 		{
-			if (board[i][j][0] == turnPlayer)
+			if (board[i][j] == turnPlayer && canJump(board, i, j))
 			{
-				if (board[i][j][0] == 'r')
-				{
-					if ((i - 1 >= 0) && (i - 1 < BOARD_SIZE) && (j - 1 >= 0) && (j - 1 < BOARD_SIZE) && board[i - 1][j - 1] == 'b' || board[i - 1][j + 1] == 'b')
-					{
-						if ((i - 2 >= 0) && (i - 2 < BOARD_SIZE) && (j - 2 >= 0) && (j - 2 < BOARD_SIZE) && board[i - 2][j - 2] == 'e' || board[i - 2][j + 2] == 'e')
-						{
-							return true;
-						}
-					}
-				}
-
-				if (board[i][j][0] == 'b')
-				{
-					if ((i - 1 >= 0) && (i - 1 < BOARD_SIZE) && (j - 1 >= 0) && (j - 1 < BOARD_SIZE) && board[i + 1][j - 1] == 'r' || board[i + 1][j + 1] == 'r')
-					{
-						if ((i - 2 >= 0) && (i - 2 < BOARD_SIZE) && (j - 2 >= 0) && (j - 2 < BOARD_SIZE) && board[i + 2][j - 2] == 'e' || board[i + 2][j + 2] == 'e')
-						{
-							return true;
-						}
-					}
-				}
+				return true;
 			}
 		}
 	}
 	return false;
+}
+
+function canJumpUpdate(board, turnPlayer)
+{
+	if (turnPlayerCanJump(board, turnPlayer))
+	{
+		document.getElementById("victoryText").innerHTML = "Mandatory jump for " + turnPlayer;
+	}
+	else
+	{
+		document.getElementById("victoryText").innerHTML = "";		
+	}
+}
+
+function onBoardClick()
+{
+	var coord = getBoardCoord();
+
+	//Case where no piece is selected
+	if (selectedPiece[0] == -1)
+	{
+		if (board[coord[0]][coord[1]] == turnPlayer)
+		{
+			selectedPiece[0] = coord[0];
+			selectedPiece[1] = coord[1];
+			highlightSquare(context, BOARD_SIZE, coord[0], coord[1]);
+		}
+	}
+	//Case where piece is selected
+	else
+	{
+		var inFront = isInFrontOf(board, selectedPiece[0], selectedPiece[1], coord[0], coord[1]);
+		if (inFront && board[coord[0]][coord[1]] == 'e')
+		{
+			board[coord[0]][coord[1]] = board[selectedPiece[0]][selectedPiece[1]];
+			board[selectedPiece[0]][selectedPiece[1]] = 'e';
+		
+			//Switch player
+			if (turnPlayer == 'r')
+			{
+				turnPlayer = 'b';
+			}
+			else
+			{
+				turnPlayer = 'r';
+			}
+		}
+		
+		canJumpUpdate(board, turnPlayer);
+		selectedPiece = [-1, -1];
+		drawBoard(context, BOARD_SIZE, board);
+	}
 }
 
 var BOARD_SIZE = 8;
