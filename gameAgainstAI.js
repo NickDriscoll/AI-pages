@@ -1,7 +1,7 @@
 //Draw the board
 function drawBoard(context, size)
 {	
-
+	context.clearRect(0, 0, canvas.width, canvas.height);
 	for (var i = 1; i < size; i++)
 	{
 		//Vertical
@@ -31,6 +31,7 @@ function drawMove(turnPlayer, x, y)
 
 function drawAll(board)
 {
+	drawBoard(context, 3);
 	for (var i = 0; i < 3; i++)
 	{
 		for (var j = 0; j < 3; j++)
